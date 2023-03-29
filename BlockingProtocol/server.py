@@ -27,8 +27,7 @@ class Server(server_pb2_grpc.ServerServicer):
     def read(self, request, context):
         if request.uuid not in self.fileObject:
             return server_pb2.ReadResponse(status = 'FAIL')
-        print(self.fileObject[request.uuid])
-        print(self.fileObject[request.uuid]['filename'])
+
         if request.uuid in self.fileObject:
             if os.path.exists('files/'+self.name+'/'+self.fileObject[request.uuid]['filename']):
                 with open('files/'+self.name+'/'+self.fileObject[request.uuid]['filename'], 'r') as f:
