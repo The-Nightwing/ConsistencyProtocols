@@ -30,7 +30,7 @@ class Client():
     def sendReadRequest(self, port):
         with grpc.insecure_channel('localhost:'+port) as channel:
             stub = server_pb2_grpc.ServerStub(channel)
-            response = stub.Read(server_pb2.ReadRequest(uuid = str(uuid.uuid4())))
+            response = stub.read(server_pb2.ReadRequest(uuid = str(uuid.uuid4())))
             print(response.status)
 
     def sendWriteRequest(self, port):

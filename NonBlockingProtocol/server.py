@@ -5,6 +5,7 @@ import registryServer_pb2
 import registryServer_pb2_grpc
 import time as ti
 import os
+from datetime import datetime as time
 from concurrent import futures
 import threading
 
@@ -15,6 +16,7 @@ class Server(server_pb2_grpc.ServerServicer):
         self.fileObject = dict()
         self.isPrimary = isPrimary
         self.name = name
+        os.mkdir('files/'+self.name)
         self.primaryServer = {
             'host': 'localhost',
             'port': port
@@ -24,13 +26,13 @@ class Server(server_pb2_grpc.ServerServicer):
     
     def read(self, request, context):
         if request.uuid not in self.fileObject:
-            return server_pb2.readResponse(status = 'FAIL')
+            return server_pb2.ReadResponse(status = 'FAIL')
         
         if request.uuid in self.fileObject:
             if os.path.exists(self.name+'/'+self.fileObject[request.uuid]['filename']):
-                return server_pb2.readResponse(status = 'SUCCESS', filename = self.fileObject[request.uuid]['filename'], timestamp = self.fileObject[request.uuid]['timestamp'])
+                return server_pb2.ReadResponse(status = 'SUCCESS', filename = self.fileObject[request.uuid]['filename'], timestamp = self.fileObject[request.uuid]['timestamp'])
             else:
-                return server_pb2.readResponse(status = 'FILE ALREADY DELETED', filename=None, timestamp=self.fileObject[request.uuid]['timestamp'])
+                return server_pb2.ReadResponse(status = 'FILE ALREADY DELETED', filename=None, timestamp=self.fileObject[request.uuid]['timestamp'])
             
     def getNonPrimaryServers(self):
         self.nonPrimaryServers = []
@@ -46,34 +48,35 @@ class Server(server_pb2_grpc.ServerServicer):
             stub = server_pb2_grpc.ServerStub(channel)
             response = stub.writeServerRequest(request)
             if response.status!='SUCCESS':
-                return server_pb2.writeResponse(status = 'FAIL')
+                return server_pb2.WriteResponse(status = 'FAIL')
                 
     def writeServerRequest(self, request, context):
+        print('writeServerRequest')
         if request.uuid not in self.fileObject:
-            if os.path.exists(self.name+'/'+request.name):
-                return server_pb2.writeResponse(status = 'FILE WITH THE SAME NAME ALREADY EXISTS')
+            if os.path.exists('files/'+self.name+'/'+request.name):
+                return server_pb2.WriteResponse(status = 'FILE WITH THE SAME NAME ALREADY EXISTS')
             else:
                 self.getNonPrimaryServers()
 
                 if self.isPrimary:
                     # write contents in filename using write 
-                    with open(self.name+'/'+request.name, 'w') as f:
+                    with open('files/'+self.name+'/'+request.name, 'w') as f:
                         f.write(request.content)
                     
                     self.fileObject[request.uuid] = {
                         'filename': request.name,
-                        'timestamp': str(ti.time())
+                        'timestamp': str(time.now())
                     }
 
                     for server in self.nonPrimaryServers:
                         # create a thread pool and writeOnNonPrimaryServers
                         thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
                         thread.start()
+
+                    return server_pb2.WriteResponse(status = 'SUCCESS')
                     
                 else:
                     #check if folder exists
-                    if not os.path.exists('files/'+self.name):
-                        os.mkdir('files/'+self.name)
 
                     # write contents in filename using write
                     with open('files/'+self.name+'/'+request.name, 'w') as f:
@@ -81,110 +84,117 @@ class Server(server_pb2_grpc.ServerServicer):
 
                     self.fileObject[request.uuid] = {
                         'filename': request.name,
-                        'timestamp': str(ti.time())
+                        'timestamp': str(time.now())
                     }
+
+                    return server_pb2.WriteResponse(status = 'SUCCESS')
         else:
             if os.path.exists(self.name+'/'+request.name):
                 self.getNonPrimaryServers()
 
                 if self.isPrimary:
-                    # write contents in filename using write 
-                    with open(self.name+'/'+request.name, 'w') as f:
+
+                    # write contents in filename using write
+                    with open('files/'+self.name+'/'+request.name, 'w') as f:
                         f.write(request.content)
                     
                     self.fileObject[request.uuid] = {
-                        'filename': request.filename,
-                        'timestamp': str(ti.time())
+                        'filename': request.name,
+                        'timestamp': str(time.now())
                     }
 
                     for server in self.nonPrimaryServers:
-                        # create a thread pool and writeOnNonPrimaryServers
                         thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
                         thread.start()
+
+                    return server_pb2.WriteResponse(status = 'SUCCESS')
 
                 else:
                     with grpc.insecure_channel('localhost:'+self.primaryServer['port']) as channel:
                         stub = server_pb2_grpc.ServerStub(channel)
                         response = stub.writeServerRequest(request)
                         if response.status!='SUCCESS':
-                            return server_pb2.writeResponse(status = 'FAIL')
+                            return server_pb2.WriteResponse(status = 'FAIL')
+                        
+                    return server_pb2.WriteResponse(status = 'SUCCESS')
             else:
-                return server_pb2.writeResponse(status = 'DELETED FILE CANNOT BE UPDATED')
+                return server_pb2.WriteResponse(status = 'DELETED FILE CANNOT BE UPDATED')
             
 
     def writeClientRequest(self, request, context):
         if request.uuid not in self.fileObject:
             if os.path.exists('files/'+self.name+'/'+request.name):
-                return server_pb2.writeResponse(status = 'FILE WITH THE SAME NAME ALREADY EXISTS')
+                return server_pb2.WriteResponse(status = 'FILE WITH THE SAME NAME ALREADY EXISTS')
             else:
                 self.getNonPrimaryServers()
 
                 if self.isPrimary:
-                    os.mkdir('files/'+self.name)
-                    # write contents in filename using write 
-                    with open(self.name+'/'+request.name, 'w') as f:
+
+                    # write contents in filename using write
+                    with open('files/'+self.name+'/'+request.name, 'w') as f:
                         f.write(request.content)
                     
                     self.fileObject[request.uuid] = {
-                        'filename': request.filename,
-                        'timestamp': str(ti.time())
+                        'filename': request.name,
+                        'timestamp': str(time.now())
                     }
 
                     for server in self.nonPrimaryServers:
                         thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
                         thread.start()
 
-                    return server_pb2.writeResponse(status = 'SUCCESS')
+                    return server_pb2.WriteResponse(status = 'SUCCESS')
                 
                 else:
                     # forward request to primary server
+                    print('Not Primary')
                     with grpc.insecure_channel('localhost:'+self.primaryServer['port']) as channel:
                         stub = server_pb2_grpc.ServerStub(channel)
                         response = stub.writeServerRequest(request)
                         if response.status!='SUCCESS':
-                            return server_pb2.writeResponse(status = 'FAIL')
+                            return server_pb2.WriteResponse(status = 'FAIL')
                         
-                    return server_pb2.writeResponse(status = 'SUCCESS')
+                    return server_pb2.WriteResponse(status = 'SUCCESS')
         else:
             if os.path.exists(self.name+'/'+request.name):
                 self.getNonPrimaryServers()
 
                 if self.isPrimary:
-                    # write contents in filename using write 
-                    with open(self.name+'/'+request.name, 'w') as f:
+                    # write contents in filename using write
+                    with open('files/'+self.name+'/'+request.name, 'w') as f:
                         f.write(request.content)
                     
                     self.fileObject[request.uuid] = {
-                        'filename': request.filename,
-                        'timestamp': str(ti.time())
+                        'filename': request.name,
+                        'timestamp': str(time.now())
                     }
 
                     for server in self.nonPrimaryServers:
                         thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
                         thread.start()
 
-                    return server_pb2.writeResponse(status = 'SUCCESS')
+                    return server_pb2.WriteResponse(status = 'SUCCESS')
                 
                 else:
                     with grpc.insecure_channel('localhost:'+self.primaryServer['port']) as channel:
                         stub = server_pb2_grpc.ServerStub(channel)
                         response = stub.writeServerRequest(request)
                         if response.status!='SUCCESS':
-                            return server_pb2.writeResponse(status = 'FAIL')
-                    return server_pb2.writeResponse(status = 'SUCCESS')
+                            return server_pb2.WriteResponse(status = 'FAIL')
+                    return server_pb2.WriteResponse(status = 'SUCCESS')
             else:
-                return server_pb2.writeResponse(status = 'DELETED FILE CANNOT BE UPDATED')
+                return server_pb2.WriteResponse(status = 'DELETED FILE CANNOT BE UPDATED')
         
     def deleteOnNonPrimaryServers(self, request, server):
         with grpc.insecure_channel('localhost:'+server) as channel:
             stub = server_pb2_grpc.ServerStub(channel)
             response = stub.deleteServerRequest(request)
             if response.status!='SUCCESS':
-                return server_pb2.deleteResponse(status = 'FAIL')
+                return server_pb2.DeleteResponse(status = 'FAIL')
     
     def deleteClientRequest(self, request, context):
         if request.uuid not in self.fileObject:
-            return server_pb2.deleteResponse(status = 'FILE DOES NOT EXIST')
+            return server_pb2.DeleteResponse(status = 'FILE DOES NOT EXIST')
         else:
             self.getNonPrimaryServers()
             if os.path.exists(self.name+'/'+self.fileObject[request.uuid]['filename']):
@@ -192,27 +202,27 @@ class Server(server_pb2_grpc.ServerServicer):
                     #delete this file
                     os.remove(self.name+'/'+self.fileObject[request.uuid]['filename'])
                     self.fileObject[request.uuid]['filename'] = ''
-                    self.fileObject[request.uuid]['timestamp'] = str(ti.time())
+                    self.fileObject[request.uuid]['timestamp'] = str(time.now())
 
                     for server in self.nonPrimaryServers:
                         thread = threading.Thread(target=self.deleteOnNonPrimaryServers, args=(request, server))
                         thread.start()
 
-                    return server_pb2.deleteResponse(status = 'SUCCESS')
+                    return server_pb2.DeleteResponse(status = 'SUCCESS')
                 else:
                     with grpc.insecure_channel('localhost:'+self.primaryServer['port']) as channel:
                         stub = server_pb2_grpc.ServerStub(channel)
                         response = stub.deleteServerRequest(request)
                         if response.status!='SUCCESS':
                             return server_pb2.Response(status = 'FAIL')
-                    return server_pb2.deleteResponse(status = 'SUCCESS')
+                    return server_pb2.DeleteResponse(status = 'SUCCESS')
 
             else:
-                return server_pb2.deleteResponse(status = 'FILE ALREADY DELETED')
+                return server_pb2.DeleteResponse(status = 'FILE ALREADY DELETED')
 
     def deleteServerRequest(self, request, context):
         if request.uuid not in self.fileObject:
-            return server_pb2.deleteResponse(status = 'FILE DOES NOT EXIST')
+            return server_pb2.DeleteResponse(status = 'FILE DOES NOT EXIST')
         else:
             self.getNonPrimaryServers()
             if os.path.exists(self.name+'/'+self.fileObject[request.uuid]['filename']):
@@ -220,20 +230,20 @@ class Server(server_pb2_grpc.ServerServicer):
                     #delete this file
                     os.remove(self.name+'/'+self.fileObject[request.uuid]['filename'])
                     self.fileObject[request.uuid]['filename'] = ''
-                    self.fileObject[request.uuid]['timestamp'] = str(ti.time())
+                    self.fileObject[request.uuid]['timestamp'] = str(time.now())
 
                     for server in self.nonPrimaryServers:
                         thread = threading.Thread(target=self.deleteOnNonPrimaryServers, args=(request, server))
                         thread.start()
 
-                    return server_pb2.deleteResponse(status = 'SUCCESS')
+                    return server_pb2.DeleteResponse(status = 'SUCCESS')
                 else:
                     with grpc.insecure_channel('localhost:'+self.primaryServer['port']) as channel:
                         stub = server_pb2_grpc.ServerStub(channel)
                         response = stub.deleteServerRequest(request)
                         if response.status!='SUCCESS':
-                            return server_pb2.deleteResponse(status = 'FAIL')
-                    return server_pb2.deleteResponse(status = 'SUCCESS')
+                            return server_pb2.DeleteResponse(status = 'FAIL')
+                    return server_pb2.DeleteResponse(status = 'SUCCESS')
 
 
 def serve():
