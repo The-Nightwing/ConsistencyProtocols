@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package proto;
+
+message ReadRequest {
+    string uuid = 1;
+}
+
+message ReadResponse {
+    string status = 1;
+    string name = 2;
+    string content = 3;
+    string timestamp = 4;
+}
+
+message WriteRequest {
+    string name = 1;
+    string content = 2;
+    string uuid = 3;
+}
+ 
+message WriteResponse {
+    string status = 1;
+    string uuid = 2;
+    string timestamp = 3;
+}
+
+message DeleteRequest {
+    string uuid = 1;
+}
+
+message DeleteResponse {
+    string status = 1;
+}
+
+service Server {
+    rpc read(ReadRequest) returns (ReadResponse) {};
+    rpc writeClientRequest(WriteRequest) returns (WriteResponse) {};
+    rpc writeServerRequest(WriteRequest) returns (WriteResponse) {};
+    rpc deleteServerRequest(DeleteRequest) returns (DeleteResponse) {};
+    rpc deleteClientRequest(DeleteRequest) returns (DeleteResponse) {};
+}

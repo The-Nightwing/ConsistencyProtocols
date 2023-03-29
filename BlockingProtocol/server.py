@@ -74,9 +74,9 @@ class Server(server_pb2_grpc.ServerServicer):
 
                     for server in self.nonPrimaryServers:
                         # create a thread pool and writeOnNonPrimaryServers
-                        # self.writeOnNonPrimaryServers(request, server)
-                        thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
-                        thread.start()
+                        self.writeOnNonPrimaryServers(request, server)
+                        # thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
+                        # thread.start()
 
                     return server_pb2.WriteResponse(status = 'SUCCESS', uuid=request.uuid)
                     
@@ -111,9 +111,9 @@ class Server(server_pb2_grpc.ServerServicer):
                     }
 
                     for server in self.nonPrimaryServers:
-                        # self.writeOnNonPrimaryServers(request, server)
-                        thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
-                        thread.start()
+                        self.writeOnNonPrimaryServers(request, server)
+                        # thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
+                        # thread.start()
 
                     return server_pb2.WriteResponse(status = 'SUCCESS', uuid=request.uuid)
 
@@ -150,9 +150,9 @@ class Server(server_pb2_grpc.ServerServicer):
                     }
 
                     for server in self.nonPrimaryServers:
-                        # self.writeOnNonPrimaryServers(request, server)
-                        thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
-                        thread.start()
+                        self.writeOnNonPrimaryServers(request, server)
+                        # thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
+                        # thread.start()
 
                     return server_pb2.WriteResponse(status = 'SUCCESS', uuid=request.uuid)
                 
@@ -181,9 +181,9 @@ class Server(server_pb2_grpc.ServerServicer):
                     }
 
                     for server in self.nonPrimaryServers:
-                        # self.writeOnNonPrimaryServers(request, server)
-                        thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
-                        thread.start()
+                        self.writeOnNonPrimaryServers(request, server)
+                        # thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
+                        # thread.start()
 
                     return server_pb2.WriteResponse(status = 'SUCCESS', uuid=request.uuid)
                 
@@ -217,9 +217,9 @@ class Server(server_pb2_grpc.ServerServicer):
                     self.fileObject[request.uuid]['timestamp'] = str(time.now())
 
                     for server in self.nonPrimaryServers:
-                        # self.deleteOnNonPrimaryServers(request, server)
-                        thread = threading.Thread(target=self.deleteOnNonPrimaryServers, args=(request, server))
-                        thread.start()
+                        self.deleteOnNonPrimaryServers(request, server)
+                        # thread = threading.Thread(target=self.deleteOnNonPrimaryServers, args=(request, server))
+                        # thread.start()
 
                     return server_pb2.DeleteResponse(status = 'SUCCESS')
                 else:
@@ -246,9 +246,9 @@ class Server(server_pb2_grpc.ServerServicer):
                     self.fileObject[request.uuid]['timestamp'] = str(time.now())
 
                     for server in self.nonPrimaryServers:
-                        # self.deleteOnNonPrimaryServers(request, server)
-                        thread = threading.Thread(target=self.deleteOnNonPrimaryServers, args=(request, server))
-                        thread.start()
+                        self.deleteOnNonPrimaryServers(request, server)
+                        # thread = threading.Thread(target=self.deleteOnNonPrimaryServers, args=(request, server))
+                        # thread.start()
 
                     return server_pb2.DeleteResponse(status = 'SUCCESS')
                 else:
