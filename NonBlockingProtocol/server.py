@@ -110,12 +110,14 @@ class Server(server_pb2_grpc.ServerServicer):
                     return server_pb2.WriteResponse(status = 'SUCCESS')
 
                 else:
-                    with grpc.insecure_channel('localhost:'+self.primaryServer['port']) as channel:
-                        stub = server_pb2_grpc.ServerStub(channel)
-                        response = stub.writeServerRequest(request)
-                        if response.status!='SUCCESS':
-                            return server_pb2.WriteResponse(status = 'FAIL')
-                        
+                    with open('files/'+self.name+'/'+request.name, 'w') as f:
+                        f.write(request.content)
+
+                    self.fileObject[request.uuid] = {
+                        'filename': request.name,
+                        'timestamp': str(time.now())
+                    }
+
                     return server_pb2.WriteResponse(status = 'SUCCESS')
             else:
                 return server_pb2.WriteResponse(status = 'DELETED FILE CANNOT BE UPDATED')

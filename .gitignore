@@ -1,3 +1,4 @@
 NonBlockingProtocol/_pycache_/
 .vscode/
 test.py
+**/_pycache_/**
