@@ -36,10 +36,17 @@ class Client():
     def sendWriteRequest(self, port):
         content = str(input("Enter Content: "))
         filename = str(input("Enter Filename: "))
+        choice = str(input('Press 1 for Creating NEW FILE, Press 2 for Updating Existirng File:  '))
+        id = None
+        if choice == '1':
+            id = str(uuid.uuid4())
+        else:
+            id = str(input("Enter UUID: "))
+
         with grpc.insecure_channel('localhost:'+port) as channel:
             stub = server_pb2_grpc.ServerStub(channel)
-            response = stub.writeClientRequest(server_pb2.WriteRequest(uuid = str(uuid.uuid4()), content=content,  name=filename))
-            print(response.status)
+            response = stub.writeClientRequest(server_pb2.WriteRequest(uuid = id, content=content,  name=filename))
+            print("Status: "+response.status+ " uuid: "+response.uuid)
 
     def sendDeleteRequest(self, port):
         with grpc.insecure_channel('localhost:'+port) as channel:

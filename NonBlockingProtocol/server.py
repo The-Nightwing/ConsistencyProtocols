@@ -73,7 +73,7 @@ class Server(server_pb2_grpc.ServerServicer):
                         thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
                         thread.start()
 
-                    return server_pb2.WriteResponse(status = 'SUCCESS')
+                    return server_pb2.WriteResponse(status = 'SUCCESS', uuid=request.uuid)
                     
                 else:
                     #check if folder exists
@@ -87,10 +87,12 @@ class Server(server_pb2_grpc.ServerServicer):
                         'timestamp': str(time.now())
                     }
 
-                    return server_pb2.WriteResponse(status = 'SUCCESS')
+                    return server_pb2.WriteResponse(status = 'SUCCESS', uuid=request.uuid)
         else:
-            if os.path.exists(self.name+'/'+request.name):
-                self.getNonPrimaryServers()
+            self.getNonPrimaryServers()
+            print('heelooooo')
+            print('files/'+self.name+'/'+request.name)
+            if os.path.exists('files/'+self.name+'/'+request.name):
 
                 if self.isPrimary:
 
@@ -107,7 +109,7 @@ class Server(server_pb2_grpc.ServerServicer):
                         thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
                         thread.start()
 
-                    return server_pb2.WriteResponse(status = 'SUCCESS')
+                    return server_pb2.WriteResponse(status = 'SUCCESS', uuid=request.uuid)
 
                 else:
                     with open('files/'+self.name+'/'+request.name, 'w') as f:
@@ -118,7 +120,7 @@ class Server(server_pb2_grpc.ServerServicer):
                         'timestamp': str(time.now())
                     }
 
-                    return server_pb2.WriteResponse(status = 'SUCCESS')
+                    return server_pb2.WriteResponse(status = 'SUCCESS',uuid=request.uuid)
             else:
                 return server_pb2.WriteResponse(status = 'DELETED FILE CANNOT BE UPDATED')
             
@@ -145,7 +147,7 @@ class Server(server_pb2_grpc.ServerServicer):
                         thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
                         thread.start()
 
-                    return server_pb2.WriteResponse(status = 'SUCCESS')
+                    return server_pb2.WriteResponse(status = 'SUCCESS', uuid=request.uuid)
                 
                 else:
                     # forward request to primary server
@@ -156,9 +158,9 @@ class Server(server_pb2_grpc.ServerServicer):
                         if response.status!='SUCCESS':
                             return server_pb2.WriteResponse(status = 'FAIL')
                         
-                    return server_pb2.WriteResponse(status = 'SUCCESS')
+                    return server_pb2.WriteResponse(status = 'SUCCESS', uuid=request.uuid)
         else:
-            if os.path.exists(self.name+'/'+request.name):
+            if os.path.exists('files/'+self.name+'/'+request.name):
                 self.getNonPrimaryServers()
 
                 if self.isPrimary:
@@ -175,7 +177,7 @@ class Server(server_pb2_grpc.ServerServicer):
                         thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
                         thread.start()
 
-                    return server_pb2.WriteResponse(status = 'SUCCESS')
+                    return server_pb2.WriteResponse(status = 'SUCCESS', uuid=request.uuid)
                 
                 else:
                     with grpc.insecure_channel('localhost:'+self.primaryServer['port']) as channel:
@@ -183,7 +185,7 @@ class Server(server_pb2_grpc.ServerServicer):
                         response = stub.writeServerRequest(request)
                         if response.status!='SUCCESS':
                             return server_pb2.WriteResponse(status = 'FAIL')
-                    return server_pb2.WriteResponse(status = 'SUCCESS')
+                    return server_pb2.WriteResponse(status = 'SUCCESS', uuid=request.uuid)
             else:
                 return server_pb2.WriteResponse(status = 'DELETED FILE CANNOT BE UPDATED')
         
