@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cserver.proto\x12\x05proto\"\x1b\n\x0bReadRequest\x12\x0c\n\x04uuid\x18\x01 \x01(\t\"P\n\x0cReadResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t\x12\x11\n\ttimestamp\x18\x04 \x01(\t\";\n\x0cWriteRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\x12\x0c\n\x04uuid\x18\x03 \x01(\t\"@\n\rWriteResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x0c\n\x04uuid\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\t\"\x1d\n\rDeleteRequest\x12\x0c\n\x04uuid\x18\x01 \x01(\t\" \n\x0e\x44\x65leteResponse\x12\x0e\n\x06status\x18\x01 \x01(\t2\xcd\x02\n\x06Server\x12\x31\n\x04read\x12\x12.proto.ReadRequest\x1a\x13.proto.ReadResponse\"\x00\x12\x41\n\x12writeClientRequest\x12\x13.proto.WriteRequest\x1a\x14.proto.WriteResponse\"\x00\x12\x41\n\x12writeServerRequest\x12\x13.proto.WriteRequest\x1a\x14.proto.WriteResponse\"\x00\x12\x44\n\x13\x64\x65leteServerRequest\x12\x14.proto.DeleteRequest\x1a\x15.proto.DeleteResponse\"\x00\x12\x44\n\x13\x64\x65leteClientRequest\x12\x14.proto.DeleteRequest\x1a\x15.proto.DeleteResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cserver.proto\x12\x05proto\"\x1b\n\x0bReadRequest\x12\x0c\n\x04uuid\x18\x01 \x01(\t\"P\n\x0cReadResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t\x12\x11\n\ttimestamp\x18\x04 \x01(\t\";\n\x0cWriteRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\x12\x0c\n\x04uuid\x18\x03 \x01(\t\"@\n\rWriteResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x0c\n\x04uuid\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\t\"(\n\nserverData\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\t\"$\n\x12serverDataResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\"\x1d\n\rDeleteRequest\x12\x0c\n\x04uuid\x18\x01 \x01(\t\" \n\x0e\x44\x65leteResponse\x12\x0e\n\x06status\x18\x01 \x01(\t2\x95\x03\n\x06Server\x12\x31\n\x04read\x12\x12.proto.ReadRequest\x1a\x13.proto.ReadResponse\"\x00\x12\x41\n\x12writeClientRequest\x12\x13.proto.WriteRequest\x1a\x14.proto.WriteResponse\"\x00\x12\x41\n\x12writeServerRequest\x12\x13.proto.WriteRequest\x1a\x14.proto.WriteResponse\"\x00\x12\x44\n\x13\x64\x65leteServerRequest\x12\x14.proto.DeleteRequest\x1a\x15.proto.DeleteResponse\"\x00\x12\x44\n\x13\x64\x65leteClientRequest\x12\x14.proto.DeleteRequest\x1a\x15.proto.DeleteResponse\"\x00\x12\x46\n\x14\x61\x64\x64NonPrimaryServers\x12\x11.proto.serverData\x1a\x19.proto.serverDataResponse\"\x00\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'server_pb2', globals())
@@ -28,10 +28,14 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _WRITEREQUEST._serialized_end=193
   _WRITERESPONSE._serialized_start=195
   _WRITERESPONSE._serialized_end=259
-  _DELETEREQUEST._serialized_start=261
-  _DELETEREQUEST._serialized_end=290
-  _DELETERESPONSE._serialized_start=292
-  _DELETERESPONSE._serialized_end=324
-  _SERVER._serialized_start=327
-  _SERVER._serialized_end=660
+  _SERVERDATA._serialized_start=261
+  _SERVERDATA._serialized_end=301
+  _SERVERDATARESPONSE._serialized_start=303
+  _SERVERDATARESPONSE._serialized_end=339
+  _DELETEREQUEST._serialized_start=341
+  _DELETEREQUEST._serialized_end=370
+  _DELETERESPONSE._serialized_start=372
+  _DELETERESPONSE._serialized_end=404
+  _SERVER._serialized_start=407
+  _SERVER._serialized_end=812
 # @@protoc_insertion_point(module_scope)

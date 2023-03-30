@@ -39,6 +39,11 @@ class ServerStub(object):
                 request_serializer=server__pb2.DeleteRequest.SerializeToString,
                 response_deserializer=server__pb2.DeleteResponse.FromString,
                 )
+        self.addNonPrimaryServers = channel.unary_unary(
+                '/proto.Server/addNonPrimaryServers',
+                request_serializer=server__pb2.serverData.SerializeToString,
+                response_deserializer=server__pb2.serverDataResponse.FromString,
+                )
 
 
 class ServerServicer(object):
@@ -74,6 +79,12 @@ class ServerServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def addNonPrimaryServers(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ServerServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -101,6 +112,11 @@ def add_ServerServicer_to_server(servicer, server):
                     servicer.deleteClientRequest,
                     request_deserializer=server__pb2.DeleteRequest.FromString,
                     response_serializer=server__pb2.DeleteResponse.SerializeToString,
+            ),
+            'addNonPrimaryServers': grpc.unary_unary_rpc_method_handler(
+                    servicer.addNonPrimaryServers,
+                    request_deserializer=server__pb2.serverData.FromString,
+                    response_serializer=server__pb2.serverDataResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -194,5 +210,22 @@ class Server(object):
         return grpc.experimental.unary_unary(request, target, '/proto.Server/deleteClientRequest',
             server__pb2.DeleteRequest.SerializeToString,
             server__pb2.DeleteResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def addNonPrimaryServers(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/proto.Server/addNonPrimaryServers',
+            server__pb2.serverData.SerializeToString,
+            server__pb2.serverDataResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
