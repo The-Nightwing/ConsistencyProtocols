@@ -44,6 +44,18 @@ class WriteRequest(_message.Message):
     uuid: str
     def __init__(self, name: _Optional[str] = ..., content: _Optional[str] = ..., uuid: _Optional[str] = ...) -> None: ...
 
+class WriteRequestServer(_message.Message):
+    __slots__ = ["content", "name", "timestamp", "uuid"]
+    CONTENT_FIELD_NUMBER: _ClassVar[int]
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
+    UUID_FIELD_NUMBER: _ClassVar[int]
+    content: str
+    name: str
+    timestamp: str
+    uuid: str
+    def __init__(self, name: _Optional[str] = ..., content: _Optional[str] = ..., uuid: _Optional[str] = ..., timestamp: _Optional[str] = ...) -> None: ...
+
 class WriteResponse(_message.Message):
     __slots__ = ["status", "timestamp", "uuid"]
     STATUS_FIELD_NUMBER: _ClassVar[int]
