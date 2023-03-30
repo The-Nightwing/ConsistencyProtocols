@@ -53,3 +53,17 @@ class WriteResponse(_message.Message):
     timestamp: str
     uuid: str
     def __init__(self, status: _Optional[str] = ..., uuid: _Optional[str] = ..., timestamp: _Optional[str] = ...) -> None: ...
+
+class serverData(_message.Message):
+    __slots__ = ["name", "port"]
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    PORT_FIELD_NUMBER: _ClassVar[int]
+    name: str
+    port: str
+    def __init__(self, name: _Optional[str] = ..., port: _Optional[str] = ...) -> None: ...
+
+class serverDataResponse(_message.Message):
+    __slots__ = ["status"]
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    status: str
+    def __init__(self, status: _Optional[str] = ...) -> None: ...

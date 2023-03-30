@@ -25,6 +25,15 @@ message WriteResponse {
     string timestamp = 3;
 }
 
+message serverData {
+    string name = 1;
+    string port = 2;
+}
+
+message serverDataResponse {
+    string status = 1;
+}
+
 message DeleteRequest {
     string uuid = 1;
 }
@@ -39,4 +48,5 @@ service Server {
     rpc writeServerRequest(WriteRequest) returns (WriteResponse) {};
     rpc deleteServerRequest(DeleteRequest) returns (DeleteResponse) {};
     rpc deleteClientRequest(DeleteRequest) returns (DeleteResponse) {};
+    rpc addNonPrimaryServers(serverData) returns (serverDataResponse) {};
 }

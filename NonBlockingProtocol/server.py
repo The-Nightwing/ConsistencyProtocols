@@ -21,7 +21,9 @@ class Server(server_pb2_grpc.ServerServicer):
             'host': 'localhost',
             'port': port
         }
-        self.nonPrimaryServers = []
+
+        if isPrimary:
+            self.nonPrimaryServers = []
     
     
     def read(self, request, context):
@@ -36,15 +38,11 @@ class Server(server_pb2_grpc.ServerServicer):
                 return server_pb2.ReadResponse(status = 'SUCCESS', content = content, name = self.fileObject[request.uuid]['filename'], timestamp = self.fileObject[request.uuid]['timestamp'])
             else:
                 return server_pb2.ReadResponse(status = 'FILE ALREADY DELETED', name=None, timestamp=self.fileObject[request.uuid]['timestamp'])
-            
-    def getNonPrimaryServers(self):
-        self.nonPrimaryServers = []
-        with grpc.insecure_channel('localhost:8888') as channel:
-            stub = registryServer_pb2_grpc.RegistryServerStub(channel)
-            response = stub.GetServerList(registryServer_pb2.serverListRequest())
-            for server in response.serverDetails:
-                if server.port!=self.primaryServer['port']:
-                    self.nonPrimaryServers.append(server.port)
+    
+    def addNonPrimaryServers(self, request, context):
+        self.nonPrimaryServers.append(request.port)
+        return server_pb2.serverDataResponse(status = 'SUCCESS')
+
 
     def writeOnNonPrimaryServers(self, request, port):
         with grpc.insecure_channel('localhost:'+port) as channel:
@@ -59,8 +57,7 @@ class Server(server_pb2_grpc.ServerServicer):
             if os.path.exists('files/'+self.name+'/'+request.name):
                 return server_pb2.WriteResponse(status = 'FILE WITH THE SAME NAME ALREADY EXISTS')
             else:
-                self.getNonPrimaryServers()
-
+               
                 if self.isPrimary:
                     # write contents in filename using write 
                     with open('files/'+self.name+'/'+request.name, 'w') as f:
@@ -93,7 +90,6 @@ class Server(server_pb2_grpc.ServerServicer):
 
                     return server_pb2.WriteResponse(status = 'SUCCESS', uuid=request.uuid)
         else:
-            self.getNonPrimaryServers()
             print('heelooooo')
             print('files/'+self.name+'/'+request.name)
             if os.path.exists('files/'+self.name+'/'+request.name):
@@ -110,7 +106,6 @@ class Server(server_pb2_grpc.ServerServicer):
                     }
 
                     for server in self.nonPrimaryServers:
-                        # self.writeOnNonPrimaryServers(request, server)
                         thread = threading.Thread(target=self.writeOnNonPrimaryServers, args=(request, server))
                         thread.start()
 
@@ -135,7 +130,6 @@ class Server(server_pb2_grpc.ServerServicer):
             if os.path.exists('files/'+self.name+'/'+request.name):
                 return server_pb2.WriteResponse(status = 'FILE WITH THE SAME NAME ALREADY EXISTS')
             else:
-                self.getNonPrimaryServers()
 
                 if self.isPrimary:
 
@@ -167,7 +161,6 @@ class Server(server_pb2_grpc.ServerServicer):
                     return server_pb2.WriteResponse(status = 'SUCCESS', uuid=request.uuid)
         else:
             if os.path.exists('files/'+self.name+'/'+request.name):
-                self.getNonPrimaryServers()
 
                 if self.isPrimary:
                     # write contents in filename using write
@@ -207,8 +200,7 @@ class Server(server_pb2_grpc.ServerServicer):
         if request.uuid not in self.fileObject:
             return server_pb2.DeleteResponse(status = 'FILE DOES NOT EXIST')
         else:
-            self.getNonPrimaryServers()
-            if os.path.exists('files/'+self.name+'/'+self.fileObject[request.uuid]['filename']):
+            if self.fileObject[request.uuid]['filename']!='' and os.path.exists('files/'+self.name+'/'+self.fileObject[request.uuid]['filename']):
                 if self.isPrimary:
                     #delete this file
                     os.remove('files/'+self.name+'/'+self.fileObject[request.uuid]['filename'])
@@ -236,8 +228,7 @@ class Server(server_pb2_grpc.ServerServicer):
         if request.uuid not in self.fileObject:
             return server_pb2.DeleteResponse(status = 'FILE DOES NOT EXIST')
         else:
-            self.getNonPrimaryServers()
-            if os.path.exists('files/'+self.name+'/'+self.fileObject[request.uuid]['filename']):
+            if self.fileObject[request.uuid]['filename']!='' and os.path.exists('files/'+self.name+'/'+self.fileObject[request.uuid]['filename']):
                 if self.isPrimary:
                     #delete this file
                     os.remove('files/'+self.name+'/'+self.fileObject[request.uuid]['filename'])

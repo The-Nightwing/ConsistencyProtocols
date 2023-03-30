@@ -1,6 +1,8 @@
 import grpc
 import registryServer_pb2
 import registryServer_pb2_grpc
+import server_pb2
+import server_pb2_grpc
 
 from concurrent import futures
 
@@ -21,7 +23,9 @@ class RegistryServer(registryServer_pb2_grpc.RegistryServerServicer):
         self.replicaList.append(request)
 
         if request.address!=self.primaryServer['port']:
-            self.nonPrimaryServers.append(request)
+            with grpc.insecure_channel('localhost:' + self.primaryServer['port']) as channel:
+                stub = server_pb2_grpc.ServerStub(channel)
+                stub.addNonPrimaryServers(server_pb2.serverData(name = request.name, port = request.address))
 
         return registryServer_pb2.Response(host = 'localhost', port = self.primaryServer['port'])
     
