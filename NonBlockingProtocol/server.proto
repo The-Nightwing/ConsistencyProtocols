@@ -42,10 +42,17 @@ message DeleteResponse {
     string status = 1;
 }
 
+message WriteRequestServer { 
+    string name = 1;
+    string content = 2;
+    string uuid = 3;
+    string timestamp = 4;
+}
+
 service Server {
     rpc read(ReadRequest) returns (ReadResponse) {};
     rpc writeClientRequest(WriteRequest) returns (WriteResponse) {};
-    rpc writeServerRequest(WriteRequest) returns (WriteResponse) {};
+    rpc writeServerRequest(WriteRequestServer) returns (WriteResponse) {};
     rpc deleteServerRequest(DeleteRequest) returns (DeleteResponse) {};
     rpc deleteClientRequest(DeleteRequest) returns (DeleteResponse) {};
     rpc addNonPrimaryServers(serverData) returns (serverDataResponse) {};
