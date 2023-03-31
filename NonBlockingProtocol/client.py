@@ -14,8 +14,6 @@ stub = registryServer_pb2_grpc.RegistryServerStub(channel)
 server_list = dict()
 connected_server_list = dict()
 
-
-
 class Client():
     def __init__(self, uuid):
         self.uuid = uuid
