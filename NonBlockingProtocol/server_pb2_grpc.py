@@ -31,7 +31,7 @@ class ServerStub(object):
                 )
         self.deleteServerRequest = channel.unary_unary(
                 '/proto.Server/deleteServerRequest',
-                request_serializer=server__pb2.DeleteRequest.SerializeToString,
+                request_serializer=server__pb2.DeleteRequestServer.SerializeToString,
                 response_deserializer=server__pb2.DeleteResponse.FromString,
                 )
         self.deleteClientRequest = channel.unary_unary(
@@ -105,7 +105,7 @@ def add_ServerServicer_to_server(servicer, server):
             ),
             'deleteServerRequest': grpc.unary_unary_rpc_method_handler(
                     servicer.deleteServerRequest,
-                    request_deserializer=server__pb2.DeleteRequest.FromString,
+                    request_deserializer=server__pb2.DeleteRequestServer.FromString,
                     response_serializer=server__pb2.DeleteResponse.SerializeToString,
             ),
             'deleteClientRequest': grpc.unary_unary_rpc_method_handler(
@@ -191,7 +191,7 @@ class Server(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/proto.Server/deleteServerRequest',
-            server__pb2.DeleteRequest.SerializeToString,
+            server__pb2.DeleteRequestServer.SerializeToString,
             server__pb2.DeleteResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

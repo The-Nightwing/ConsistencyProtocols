@@ -34,6 +34,11 @@ message serverDataResponse {
     string status = 1;
 }
 
+message DeleteRequestServer{
+    string uuid = 1;
+    string timestamp = 2;
+}
+
 message DeleteRequest {
     string uuid = 1;
 }
@@ -53,7 +58,7 @@ service Server {
     rpc read(ReadRequest) returns (ReadResponse) {};
     rpc writeClientRequest(WriteRequest) returns (WriteResponse) {};
     rpc writeServerRequest(WriteRequestServer) returns (WriteResponse) {};
-    rpc deleteServerRequest(DeleteRequest) returns (DeleteResponse) {};
+    rpc deleteServerRequest(DeleteRequestServer) returns (DeleteResponse) {};
     rpc deleteClientRequest(DeleteRequest) returns (DeleteResponse) {};
     rpc addNonPrimaryServers(serverData) returns (serverDataResponse) {};
 }

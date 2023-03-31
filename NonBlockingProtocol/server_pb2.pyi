@@ -10,6 +10,14 @@ class DeleteRequest(_message.Message):
     uuid: str
     def __init__(self, uuid: _Optional[str] = ...) -> None: ...
 
+class DeleteRequestServer(_message.Message):
+    __slots__ = ["timestamp", "uuid"]
+    TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
+    UUID_FIELD_NUMBER: _ClassVar[int]
+    timestamp: str
+    uuid: str
+    def __init__(self, uuid: _Optional[str] = ..., timestamp: _Optional[str] = ...) -> None: ...
+
 class DeleteResponse(_message.Message):
     __slots__ = ["status"]
     STATUS_FIELD_NUMBER: _ClassVar[int]
