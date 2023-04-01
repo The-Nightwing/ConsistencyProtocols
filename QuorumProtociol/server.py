@@ -63,7 +63,7 @@ class Server(server_pb2_grpc.ServerServicer):
     def delete(self, request, context):
         print('DELETE REQUEST for '+request.uuid)
         if request.uuid in self.fileObject:
-            if os.path.exists('files/'+self.name+'/'+self.fileObject[request.uuid]['filename']):
+            if self.fileObject[request.uuid]['filename']!='' and os.path.exists('files/'+self.name+'/'+self.fileObject[request.uuid]['filename']):
                 os.remove('files/'+self.name+'/'+self.fileObject[request.uuid]['filename'])
                 t = time.time()
                 dt = datetime.fromtimestamp(t)
