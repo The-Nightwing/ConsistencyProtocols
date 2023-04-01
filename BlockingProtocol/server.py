@@ -1,3 +1,4 @@
+import sys
 import grpc
 import server_pb2
 import server_pb2_grpc
@@ -31,11 +32,12 @@ class Server(server_pb2_grpc.ServerServicer):
             return server_pb2.ReadResponse(status = 'FAIL')
         
         if request.uuid in self.fileObject:
-            if os.path.exists('files/'+self.name+'/'+self.fileObject[request.uuid]['filename']):
-                with open('files/'+self.name+'/'+self.fileObject[request.uuid]['filename'], 'r') as f:
-                    content = f.read()
-                # content = self.fileObject[request.uuid]['content']
-                return server_pb2.ReadResponse(status = 'SUCCESS', content = content, name = self.fileObject[request.uuid]['filename'], timestamp = self.fileObject[request.uuid]['timestamp'])
+            if self.fileObject[request.uuid]['filename']!='':
+                if os.path.exists('files/'+self.name+'/'+self.fileObject[request.uuid]['filename']):
+                    with open('files/'+self.name+'/'+self.fileObject[request.uuid]['filename'], 'r') as f:
+                        content = f.read()
+                    # content = self.fileObject[request.uuid]['content']
+                    return server_pb2.ReadResponse(status = 'SUCCESS', content = content, name = self.fileObject[request.uuid]['filename'], timestamp = self.fileObject[request.uuid]['timestamp'])
             else:
                 return server_pb2.ReadResponse(status = 'FILE ALREADY DELETED', name=None, timestamp=self.fileObject[request.uuid]['timestamp'])
     
@@ -246,9 +248,7 @@ class Server(server_pb2_grpc.ServerServicer):
                 return server_pb2.DeleteResponse(status = 'FILE ALREADY DELETED')
 
 
-def serve():
-    name = input('Enter server name: ')
-    port = input('Enter port number: ')
+def serve(name, port):
     with grpc.insecure_channel('localhost:8888') as channel:
         stub = registryServer_pb2_grpc.RegistryServerStub(channel)
         response =  stub.Register(registryServer_pb2.Server(name=name, address=port))
@@ -265,6 +265,11 @@ def serve():
     server.start()
     print("Server started, listening on " + port)
     server.wait_for_termination()
-        
+
+def main(name, port):
+    serve(name, port)
+
 if __name__=='__main__':
-    serve()
+    name = sys.argv[1]
+    port = sys.argv[2]
+    serve(name, port)
