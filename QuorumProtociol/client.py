@@ -6,7 +6,7 @@ import registryServer_pb2_grpc
 import uuid
 import time
 from datetime import datetime
-
+import sys
 
 client_name = str(uuid.uuid4())
 channel = grpc.insecure_channel('localhost:50051')
@@ -24,7 +24,12 @@ class Client():
             response = stub.GetServerList(registryServer_pb2.serverListRequest())
             for server in response.serverDetails:
                 print("Host: "+server.host+", Port: "+server.port)
-    
+                
+    def getServerListInternal(self):
+        with grpc.insecure_channel('localhost:8888') as channel:
+            stub = registryServer_pb2_grpc.RegistryServerStub(channel)
+            return stub.GetServerList(registryServer_pb2.serverListRequest()).serverDetails
+        
     def getReadQuorum(self):
         with grpc.insecure_channel('localhost:8888') as channel:
             stub = registryServer_pb2_grpc.RegistryServerStub(channel)
@@ -35,6 +40,20 @@ class Client():
             stub = registryServer_pb2_grpc.RegistryServerStub(channel)
             return stub.GetWriteQuorum(registryServer_pb2.serverListRequest()).serverDetails
 
+    def sendAllReadRequest(self,id,):
+        server_list = self.getServerListInternal()
+        
+        latest_timestamp = 0
+        dt = datetime.fromtimestamp(latest_timestamp)
+        final_respone = ''
+        deleted = False
+        for server in server_list:
+            with grpc.insecure_channel('localhost:'+server.port) as channel:
+                stub = server_pb2_grpc.ServerStub(channel)
+                response = stub.read(server_pb2.ReadRequest(uuid=id))
+                print('RESPONSE FROM: '+server.port)
+                print(response)
+    
     def sendReadRequest(self, id):
         server_list = self.getReadQuorum()
         
@@ -117,7 +136,7 @@ def loop():
         elif choice == 5:
             break
 
-def testCase():
+def test():
     client = Client(str(uuid.uuid4()))
 
     print("Test Case 1: Get Server List")
@@ -125,30 +144,42 @@ def testCase():
 
     print("Test Case 2: Write Request")
     id = str(uuid.uuid4())
-    port = '5002'
-    client.sendWriteRequest(port, 'Hello World', 'test.txt', id)
+    client.sendWriteRequest('Hello World', 'test.txt', id)
     
-    print("Test Case 3: Read Request")
-    client.sendReadRequest(port, id)
+    print("Test Case 3: Read Request from datastore")
+    client.sendReadRequest(id)
+    
+    print("Test Case 3.1: Read Request from each replica")
+    client.sendAllReadRequest(id)
     
     print("Test Case 4: Update File Request")
-    client.sendWriteRequest(port, 'Hello World updated', 'test.txt', id)
+    client.sendWriteRequest('Hello World updated', 'test.txt', id)
     
     print("Test Case 5: Read Request After Update")
-    client.sendReadRequest(port, id)
+    client.sendReadRequest(id)
+    
+    print("Test Case 5.1: Read Request After Update all replicas")
+    client.sendAllReadRequest(id)
     
     print("Test Case 6: Delete Request")
-    client.sendDeleteRequest(port, id)
+    client.sendDeleteRequest(id)
     
     print("Test Case 7: Read Request After Delete")
-    client.sendReadRequest(port, id)
+    client.sendReadRequest(id)
+    
+    print("Test Case 7.1: Read Request After Delete all replicas")
+    client.sendAllReadRequest(id)
     
     print("Test Case 8: Same File Update Request After Delete")
-    client.sendWriteRequest(port, 'Hello World-2', 'test.txt', id)
+    client.sendWriteRequest('Hello World-2', 'test.txt', id)
     
     print("Test Case 9: Delete Request After Delete")
-    client.sendDeleteRequest(port, id)
+    client.sendDeleteRequest(id)
 
 if __name__=="__main__":
-    loop()
+    print(sys.argv)
+    if sys.argv[1]=='run':
+        loop()
+    elif sys.argv[1]=='test':
+        test()
     pass
