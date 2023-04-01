@@ -32,6 +32,7 @@ class Client():
             print(response.status)
             if response.status == 'SUCCESS':
                 print(response.content)
+            print(response.timestamp)
 
     def sendWriteRequest(self, port, content, filename, id):
         with grpc.insecure_channel('localhost:'+port) as channel:
@@ -85,34 +86,55 @@ def loop():
 def testCase():
     client = Client(str(uuid.uuid4()))
 
-    print("Test Case 1: Get Server List")
+    print("\nTest Case 1: Get Server List \n")
     client.getServerList()
 
-    print("Test Case 2: Write Request")
+    print("\nTest Case 2: Write Request \n")
     id = str(uuid.uuid4())
-    port = '5002'
+    port = '5001'
     client.sendWriteRequest(port, 'Hello World', 'test.txt', id)
     
-    print("Test Case 3: Read Request")
+    print("\nTest Case 3: Read Request")
+    print("\nFrom Server 1:")
     client.sendReadRequest(port, id)
+    print("\nFrom Server 2:")
+    client.sendReadRequest("5002", id)
+    print("\nFrom Server 3:")
+    client.sendReadRequest("5003", id)
+    print("\nFrom Server 4:")
+    client.sendReadRequest("5004", id)
+    print("\nFrom Server 5:")
+    client.sendReadRequest("5005", id)
     
-    print("Test Case 4: Update File Request")
+    time.sleep(1)
+    print("\nTest Case 4: Update File Request \n")
     client.sendWriteRequest(port, 'Hello World updated', 'test.txt', id)
     
-    print("Test Case 5: Read Request After Update")
+    print("\nTest Case 5: Read Request After Update")
+    print("\nFrom Server 1:")
     client.sendReadRequest(port, id)
+    print("\nFrom Server 2:")
+    client.sendReadRequest("5002", id)
+    print("\nFrom Server 3:")
+    client.sendReadRequest("5003", id)
+    print("\nFrom Server 4:")
+    client.sendReadRequest("5004", id)
+    print("\nFrom Server 5:")
+    client.sendReadRequest("5005", id)
     
-    print("Test Case 6: Delete Request")
+    time.sleep(1)
+    print("\nTest Case 6: Delete Request \n")
     client.sendDeleteRequest(port, id)
     
-    print("Test Case 7: Read Request After Delete")
+    print("\nTest Case 7: Read Request After Delete \n")
     client.sendReadRequest(port, id)
     
-    print("Test Case 8: Same File Update Request After Delete")
+    print("\nTest Case 8: Same File Update Request After Delete \n")
     client.sendWriteRequest(port, 'Hello World-2', 'test.txt', id)
     
-    print("Test Case 9: Delete Request After Delete")
+    print("\nTest Case 9: Delete Request After Delete \n")
     client.sendDeleteRequest(port, id)
+    return
 
 if __name__=="__main__":
     loop()

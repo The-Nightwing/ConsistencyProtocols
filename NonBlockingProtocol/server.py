@@ -39,7 +39,7 @@ class Server(server_pb2_grpc.ServerServicer):
                     # content = self.fileObject[request.uuid]['content']
                     return server_pb2.ReadResponse(status = 'SUCCESS', content = content, name = self.fileObject[request.uuid]['filename'], timestamp = self.fileObject[request.uuid]['timestamp'])
             else:
-                return server_pb2.ReadResponse(status = 'FILE ALREADY DELETED', name=None, timestamp=self.fileObject[request.uuid]['timestamp'])
+                return server_pb2.ReadResponse(status = 'FAIL: FILE ALREADY DELETED', content=None, timestamp=self.fileObject[request.uuid]['timestamp'])
     
     def addNonPrimaryServers(self, request, context):
         self.nonPrimaryServers.append(request.port)
@@ -56,7 +56,7 @@ class Server(server_pb2_grpc.ServerServicer):
     def writeServerRequest(self, request, context):
         if request.uuid not in self.fileObject:
             if os.path.exists('files/'+self.name+'/'+request.name):
-                return server_pb2.WriteResponse(status = 'FILE WITH THE SAME NAME ALREADY EXISTS')
+                return server_pb2.WriteResponse(status = 'FAIL: FILE WITH THE SAME NAME ALREADY EXISTS')
             else:
                
                 if self.isPrimary:
@@ -116,13 +116,13 @@ class Server(server_pb2_grpc.ServerServicer):
 
                     return server_pb2.WriteResponse(status = 'SUCCESS',uuid=request.uuid, timestamp = request.timestamp)
             else:
-                return server_pb2.WriteResponse(status = 'DELETED FILE CANNOT BE UPDATED')
+                return server_pb2.WriteResponse(status = 'FAIL: DELETED FILE CANNOT BE UPDATED')
             
 
     def writeClientRequest(self, request, context):
         if request.uuid not in self.fileObject:
             if os.path.exists('files/'+self.name+'/'+request.name):
-                return server_pb2.WriteResponse(status = 'FILE WITH THE SAME NAME ALREADY EXISTS')
+                return server_pb2.WriteResponse(status = 'FAIL: FILE WITH THE SAME NAME ALREADY EXISTS')
             else:
                 if self.isPrimary:
                     # write contents in filename using write
@@ -179,7 +179,7 @@ class Server(server_pb2_grpc.ServerServicer):
                             return server_pb2.WriteResponse(status = 'FAIL')
                     return server_pb2.WriteResponse(status = 'SUCCESS', uuid=request.uuid, timestamp = response.timestamp)
             else:
-                return server_pb2.WriteResponse(status = 'DELETED FILE CANNOT BE UPDATED')
+                return server_pb2.WriteResponse(status = 'FAIL: DELETED FILE CANNOT BE UPDATED')
         
     def deleteOnNonPrimaryServers(self, request, server, timestamp):
         with grpc.insecure_channel('localhost:'+server) as channel:
@@ -190,7 +190,7 @@ class Server(server_pb2_grpc.ServerServicer):
     
     def deleteClientRequest(self, request, context):
         if request.uuid not in self.fileObject:
-            return server_pb2.DeleteResponse(status = 'FILE DOES NOT EXIST')
+            return server_pb2.DeleteResponse(status = 'FAIL: FILE DOES NOT EXIST')
         else:
             if self.fileObject[request.uuid]['filename']!='':
                 if os.path.exists('files/'+self.name+'/'+self.fileObject[request.uuid]['filename']):
@@ -215,11 +215,11 @@ class Server(server_pb2_grpc.ServerServicer):
                                 return server_pb2.Response(status = 'FAIL')
                         return server_pb2.DeleteResponse(status = 'SUCCESS')
             else:
-                return server_pb2.DeleteResponse(status = 'FILE ALREADY DELETED')
+                return server_pb2.DeleteResponse(status = 'FAIL: FILE ALREADY DELETED')
 
     def deleteServerRequest(self, request, context):
         if request.uuid not in self.fileObject:
-            return server_pb2.DeleteResponse(status = 'FILE DOES NOT EXIST')
+            return server_pb2.DeleteResponse(status = 'FAIL: FILE DOES NOT EXIST')
         else:
             if self.fileObject[request.uuid]['filename']!='':
                 if os.path.exists('files/'+self.name+'/'+self.fileObject[request.uuid]['filename']):
@@ -243,7 +243,7 @@ class Server(server_pb2_grpc.ServerServicer):
 
                         return server_pb2.DeleteResponse(status = 'SUCCESS')
             else:
-                return server_pb2.DeleteResponse(status = 'FILE ALREADY DELETED')
+                return server_pb2.DeleteResponse(status = 'FAIL: FILE ALREADY DELETED')
 
 
 def serve(name, port):
@@ -262,7 +262,10 @@ def serve(name, port):
     server.start()
     print("Server started, listening on " + port)
     server.wait_for_termination()
-        
+
+def main(name, port):
+    serve(name, port)
+
 if __name__=='__main__':
     name = sys.argv[1]
     port = sys.argv[2]

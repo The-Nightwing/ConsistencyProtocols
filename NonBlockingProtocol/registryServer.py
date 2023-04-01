@@ -10,7 +10,6 @@ class RegistryServer(registryServer_pb2_grpc.RegistryServerServicer):
     def __init__(self) -> None:
         super().__init__()
         self.replicaList = []
-        self.nonPrimaryServers = []
         self.primaryServer = {}
     
     def Register(self, request, context):
@@ -37,8 +36,7 @@ class RegistryServer(registryServer_pb2_grpc.RegistryServerServicer):
 
         return registryServer_pb2.serverListResponse(serverDetails = responseServerList)
     
-
-if __name__=='__main__':
+def main():
     port = '8888'
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     registryServer_pb2_grpc.add_RegistryServerServicer_to_server(RegistryServer(),server)
@@ -46,3 +44,6 @@ if __name__=='__main__':
     server.start()
     print("Server started, listening on " + port)
     server.wait_for_termination()
+
+if __name__=='__main__':
+    main()

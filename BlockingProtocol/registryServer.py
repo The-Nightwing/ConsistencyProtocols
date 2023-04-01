@@ -11,7 +11,6 @@ class RegistryServer(registryServer_pb2_grpc.RegistryServerServicer):
     def __init__(self) -> None:
         super().__init__()
         self.replicaList = []
-        self.nonPrimaryServers = []
         self.primaryServer = {}
     
     def Register(self, request, context):
