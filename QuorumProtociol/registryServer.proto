@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package rpc;
+
+message Server {
+   string name = 1;
+   string address = 2;
+}
+
+message serverListRequest {
+}
+
+message Response {
+    string host = 1;
+    string port = 2;
+}
+
+message serverListResponse {
+    message  ServerDetails {
+        string host = 1;
+        string port = 2;
+    }
+    repeated ServerDetails serverDetails = 1;
+}
+
+service RegistryServer {
+    rpc Register (Server) returns (Response) {};
+    rpc GetReadQuorum(serverListRequest) returns (serverListResponse) {}; 
+    rpc GetWriteQuorum(serverListRequest) returns (serverListResponse) {};
+    rpc GetServerList(serverListRequest) returns (serverListResponse) {};
+}
